@@ -75,23 +75,18 @@ def run(command: list[str], cwd: Path) -> str:
     return result.stdout.rstrip()
 
 
-def terminal_screenshot(title: str, command: str, output: str, destination: Path) -> None:
-    width, margin, header = 1500, 34, 62
+def terminal_screenshot(command: str, output: str, destination: Path) -> None:
+    width, margin = 1500, 34
     font = ImageFont.truetype("C:/Windows/Fonts/consola.ttf", 22)
     bold = ImageFont.truetype("C:/Windows/Fonts/consolab.ttf", 22)
-    title_font = ImageFont.truetype("C:/Windows/Fonts/segoeuib.ttf", 20)
     lines = [command]
     for raw_line in output.splitlines():
         lines.extend(textwrap.wrap(raw_line, width=112, replace_whitespace=False) or [""])
     line_height = 31
-    height = header + margin * 2 + line_height * len(lines)
+    height = margin * 2 + line_height * len(lines)
     image = Image.new("RGB", (width, height), "#111827")
     draw = ImageDraw.Draw(image)
-    draw.rectangle((0, 0, width, header), fill="#1f2937")
-    for x, color in ((25, "#ef4444"), (55, "#f59e0b"), (85, "#22c55e")):
-        draw.ellipse((x, 21, x + 17, 38), fill=color)
-    draw.text((width // 2, 30), title, font=title_font, fill="#e5e7eb", anchor="mm")
-    y = header + margin
+    y = margin
     for index, line in enumerate(lines):
         color = "#60a5fa" if index == 0 else (
             "#4ade80" if "passed" in line or "Validated" in line else
@@ -118,25 +113,21 @@ def collect_evidence() -> None:
     fixed_app = run([sys.executable, "processor.py"], ROOT)
     fixed_tests = run([sys.executable, "-m", "pytest", "test_processor.py", "-q"], ROOT)
     terminal_screenshot(
-        "Step 2 — Buggy application output",
         "PS ...\\LAB7> python processor.py",
         buggy_app,
         SCREENSHOTS / "01_buggy_application.png",
     )
     terminal_screenshot(
-        "Step 4 — Hypothesis exposes validation bugs",
         "PS ...\\LAB7> python -m pytest test_processor.py -q --tb=no",
         buggy_tests,
         SCREENSHOTS / "02_failing_fuzz_tests.png",
     )
     terminal_screenshot(
-        "Step 5 — Fixed application output",
         "PS ...\\LAB7> python processor.py",
         fixed_app,
         SCREENSHOTS / "03_fixed_application.png",
     )
     terminal_screenshot(
-        "Step 6 — Fuzz tests pass after hardening",
         "PS ...\\LAB7> python -m pytest test_processor.py -q",
         fixed_tests,
         SCREENSHOTS / "04_passing_fuzz_tests.png",
@@ -183,7 +174,7 @@ def build_report() -> None:
     document = SimpleDocTemplate(
         str(REPORT), pagesize=A4, rightMargin=45, leftMargin=45,
         topMargin=45, bottomMargin=48, title="Lab 7 Fuzz Testing Report",
-        author="Pranay V. Shah",
+        author="Pranay Shah",
     )
     story = [
         Spacer(1, 0.8 * inch),
@@ -192,7 +183,8 @@ def build_report() -> None:
         Spacer(1, 0.35 * inch),
         Table(
             [
-                ["Student", "Pranay V. Shah"],
+                ["Student", "Pranay Shah"],
+                ["SRN", "PES2UG24CS366"],
                 ["Email", "pranay.vshah06@gmail.com"],
                 ["GitHub", "PurposeKnight"],
                 ["Repository", "PurposeKnight/L6_L7_58_restaurant_bill"],
